@@ -1,6 +1,7 @@
 from embeddings import EmbeddingService
 from vectorstore import VectorStore
-from database import SessionLocal, Produto 
+from database import SessionLocal
+from models import Produto
 import numpy as np
 
 class RAGipeline:

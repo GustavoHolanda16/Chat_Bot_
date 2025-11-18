@@ -1,14 +1,13 @@
-import React, { useState, useRef, useEffect} from 'react'
-import Message from './Message'
+import React, { useState, useRef, useEffect } from 'react'
+import Message from './Message.jsx'
 import { sendMessage } from '../services/api'
-import { getNativeElementReferenceFromReactNativeDocumentElementInstanceHandle } from 'react-native/types_generated/src/private/webapis/dom/nodes/internals/ReactNativeDocumentElementInstanceHandle'
 
 const Chat = () => {
     const [messages, setMessages] = useState([
         {
-            id:1,
-            text: 'Olá! Sou um vendedor virtual da loja. Como posso ajudá-lo? ',
-            isUser : false,
+            id: 1,
+            text: 'Olá! Sou seu assistente virtual de vendas. Posso ajudar você a encontrar a camisa perfeita!',
+            isUser: false,
             timestamp: new Date()
         }
     ])
@@ -17,8 +16,7 @@ const Chat = () => {
     const messagesEndRef = useRef(null)
 
     const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth"})
-
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
     }
 
     useEffect(() => {
@@ -27,11 +25,13 @@ const Chat = () => {
 
     const handleSendMessage = async (e) => {
         e.preventDefault()
-
         if (!inputMessage.trim() || isLoading) return
 
+        console.log('📤 Enviando mensagem:', inputMessage)
+
+        // Adiciona mensagem do usuário
         const userMessage = {
-            id: DAte.now(),
+            id: Date.now(),
             text: inputMessage,
             isUser: true,
             timestamp: new Date()
@@ -42,75 +42,61 @@ const Chat = () => {
         setIsLoading(true)
 
         try {
-            const response = await sendMessage(inputMessage)
-            const reader = response.body.getReader()
-            const decoder = new TextDecoder()
-            let assistantMessage = ''
-
-            const botMessage = {
-                id: Date.now() +1,
-                text: '',
+            // Adiciona mensagem de loading do bot
+            const loadingMessage = {
+                id: Date.now() + 1,
+                text: '...',
                 isUser: false,
-                timestamp: new Date()
+                timestamp: new Date(),
+                isLoading: true
             }
+            setMessages(prev => [...prev, loadingMessage])
 
-            setMessages(prev => [...prev, botMessage])
+            // Chama a API
+            const response = await sendMessage(inputMessage)
+            console.log('✅ Resposta da API:', response)
 
-            while (true) {
-                const {done, value} = await reader.read()
-                if (done) break
+            // Substitui a mensagem de loading pela resposta real
+            setMessages(prev => prev.map(msg => 
+                msg.id === loadingMessage.id 
+                    ? { 
+                        ...msg, 
+                        text: response.response,
+                        isLoading: false 
+                      }
+                    : msg
+            ))
 
-                const chunk = decoder.decode(value)
-                const lines = chuck.split('\n')
-
-                for (const line of lines) {
-                    if (line.startsWith('data: ')) {
-                        try {
-                            const data = JSON.parse(line.slice(6))
-                            assistantMessage += data.data
-
-                            setMessages(prev => prev.map(msg =>
-                                msg.id === botMessage.id
-                                ?{ ...msg, text: assistantMessage}
-                                : msg
-                            ))
-                        } catch (e){
-                        }
-                    }
-                }
-            }
-        }catch (error){
-            console.error('Error ao enviar mensagem:', error)
+        } catch (error) {
+            console.error('❌ Erro no chat:', error)
+            
+            // Remove a mensagem de loading e adiciona erro
+            setMessages(prev => prev.filter(msg => !msg.isLoading))
+            
             const errorMessage = {
-                id: Date.now() +1,
-                text: "Desculpe, ocorreu um erro ao processsar sua mensagem. Tente novamente",
+                id: Date.now() + 1,
+                text: "Desculpe, estou com problemas técnicos. Tente novamente em alguns instantes.",
                 isUser: false,
                 timestamp: new Date()
             }
             setMessages(prev => [...prev, errorMessage])
-        }finally{
+        } finally {
             setIsLoading(false)
         }
     }
+
     return (
         <div className='chat-container'>
             <div className='chat-messages'>
-                {messages.map((message) =>(
-                    <message
-                        key = {message.id}
-                        text = {message.text}
-                        isUser = {message.isUser}
-                        timestamp = {message.timestamp}
+                {messages.map((message) => (
+                    <Message
+                        key={message.id}
+                        text={message.text}
+                        isUser={message.isUser}
+                        timestamp={message.timestamp}
+                        isLoading={message.isLoading}
                     />
                 ))}
-                {isLoading && (
-                    <message
-                        text = '...'
-                        isUser = {false}
-                        timestamp = {new Date()}
-                        isLoading= {true}    
-                    />
-                )}
                 <div ref={messagesEndRef} />
             </div>
 
@@ -120,7 +106,7 @@ const Chat = () => {
                         type='text'
                         value={inputMessage}
                         onChange={(e) => setInputMessage(e.target.value)}
-                        placeholder='Digite sua mensagem'
+                        placeholder='Digite sua mensagem...'
                         disabled={isLoading}
                         className='chat-input'
                     />
@@ -129,7 +115,7 @@ const Chat = () => {
                         disabled={!inputMessage.trim() || isLoading}
                         className='send-button'
                     >
-                        {isLoading ? 'Aguarde': '>'}
+                        {isLoading ? '...' : '>'}
                     </button>
                 </div>
             </form>

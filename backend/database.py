@@ -1,0 +1,10 @@
+from sqlalchemy import create_engine, Column, INTEGER, String, Float
+from sqlalchemy.orm import declarative_base, sessionmaker
+
+DATABASE_URL = 'sqlite:///./db/store.db'
+
+engine = create_engine(DATABASE_URL, connect_args={"ckeck_same_thread":False})
+
+SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
+Base = declarative_base()
+

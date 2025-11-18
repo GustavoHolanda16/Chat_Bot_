@@ -21,7 +21,7 @@ def popular():
             cor = cor,
             preco = 59.90,
             estoque = 101,
-            descricao = f"Camisa polo manga curta sem estamapa, na cor {cor}, tecido leve e confortável, estilo casual"
+            descricao = f"Camisa polo manga curta sem estampa, na cor {cor}, tecido leve e confortável, estilo casual"
         ))
 
         produtos.append(Produto(
@@ -31,7 +31,7 @@ def popular():
             cor = cor,
             preco = 69.90,
             estoque = 184,
-            descricao = f"Camisa polo manga curta com estampa, na cor {cor}, tecido leve e confortavel, estilo casual"
+            descricao = f"Camisa polo manga curta com estampa, na cor {cor}, tecido leve e confortável, estilo casual"
         ))
 
         #Camisa normal
@@ -53,7 +53,7 @@ def popular():
             cor = cor,
             preco = 49.99,
             estoque = 84,
-            descricao = f"Camisa casual, gola normal sem estampa na cor {cor}, ideal para uso diário."
+            descricao = f"Camisa casual, gola normal com estampa na cor {cor}, ideal para uso diário."
         ))
 
         #Camisa Social
@@ -63,6 +63,7 @@ def popular():
             variante = "lisa",
             manga = "curta",
             cor = cor,
+            estoque = 93,
             preco = 110.90,
             descricao = f"Camisa social de manga curta, na cor {cor}, ideal para ambientes formais."
         ))
@@ -72,6 +73,7 @@ def popular():
             variante = "lisa",
             manga = "longa",
             cor = cor,
+            estoque = 195,
             preco = 199.99,
             descricao = f"Camisa social de manga longa, na cor {cor}, com acabamento premium, material importado."
         ))    
@@ -80,5 +82,5 @@ def popular():
     db.commit()
     print("Banco populado com sucesso!")
 
-    if __name__ == "__main__":
-        popular
+if __name__ == "__main__":
+    popular()

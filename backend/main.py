@@ -1,16 +1,16 @@
-# main.py - CORRIGIDO
+# main.py - ATUALIZADO PARA GEMINI
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from populate import popular
 from rag import RAGPipeline
-from ollama_client import OllamaClient
+from gemini_client import GeminiClient  # Alterado aqui
 import logging
 import time
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="Sistema de Consulta de Camisas")
+app = FastAPI(title="Sistema de Consulta de Camisas - Gemini")
 
 app.add_middleware(
     CORSMiddleware,
@@ -31,8 +31,8 @@ async def startup_event():
     global rag, agente
     try:
         rag = RAGPipeline()
-        agente = OllamaClient()
-        logger.info("Sistema do agente inicializado")
+        agente = GeminiClient()  # Alterado aqui
+        logger.info("Sistema do agente Gemini inicializado")
     except Exception as e:
         logger.error(f"Erro na inicialização: {e}")
 
@@ -66,25 +66,18 @@ async def chat(q: str = Query(..., min_length=1, description="Consulta do usuár
         
         if not sistema_pronto or rag is None:
             return {
-                "resposta": "Sistema em inicialização. Por favor, execute /prepare-db primeiro.",
+                "resposta": " Sistema em inicialização. Por favor, execute /prepare-db primeiro.",
                 "produtos_encontrados": 0
             }
         
         # Busca produtos relevantes
-        produtos = rag.retrieve(q, k=4)
-        logger.info(f"Produtos relevantes encontrados: {len(produtos)}")
+        produtos = rag.retrieve(q, k=8)  # Aumentei para 8 produtos
         
-        if not produtos:
-            return {
-                "resposta": "Não encontrei camisas para essa consulta. Tente buscar por 'polo', 'social', 'casual' ou cores como 'azul', 'preto', etc.",
-                "produtos_encontrados": 0
-            }
-        
-        # Gera resposta
+        # Gera resposta profissional
         if agente is None:
-            agente = OllamaClient()
+            agente = GeminiClient()
             
-        resposta = agente.generate(produtos)
+        resposta = agente.generate(produtos, q)  # Passa a query original
         
         processing_time = time.time() - start_time
         logger.info(f"Consulta processada em {processing_time:.2f}s")
@@ -98,7 +91,7 @@ async def chat(q: str = Query(..., min_length=1, description="Consulta do usuár
     except Exception as e:
         logger.error(f"Erro no processamento da consulta: {e}")
         return {
-            "resposta": "Desculpe, ocorreu um erro interno. Tente novamente.",
+            "resposta": " Desculpe, ocorreu um erro interno. Tente novamente.",
             "produtos_encontrados": 0
         }
 

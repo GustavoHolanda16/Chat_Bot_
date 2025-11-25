@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 class GeminiClient:
     def __init__(self, model="gemini-pro"):
-        self.api_key = os.getenv("GEMINI_API_KEY", "AIzaSyCz2pZJ_Uq1ZR77azSU9nTVm5l_memKmDE")
+        self.api_key = os.getenv("GEMINI_API_KEY", "SUA_API_AQUI")
         if not self.api_key:
             logger.warning("GEMINI_API_KEY não encontrada - usando respostas naturais")
             self.model = None
